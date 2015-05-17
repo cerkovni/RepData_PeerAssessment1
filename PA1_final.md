@@ -122,6 +122,7 @@ maxinterval
 ```
 
 ## Imputing missing values
+# imputation was performed by replacing missing values with the interval mean
 
 
 ```r

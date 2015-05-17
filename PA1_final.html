@@ -163,6 +163,9 @@ maxinterval</code></pre>
 </div>
 <div id="imputing-missing-values" class="section level2">
 <h2>Imputing missing values</h2>
+</div>
+<div id="imputation-was-performed-by-replacing-missing-values-with-the-interval-mean" class="section level1">
+<h1>imputation was performed by replacing missing values with the interval mean</h1>
 <pre class="r"><code>intervalstepmean &lt;- vector(mode =&quot;numeric&quot;, length = length(levels(as.factor(d$interval))))
 
 for (i in 1:length(levels(as.factor(d$interval))))
