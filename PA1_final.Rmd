@@ -1,0 +1,109 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+
+```{r}
+
+ab <- unzip("activity.zip")
+d <- read.csv(ab, header = TRUE)
+
+#d$date <- as.Date(as.character(d$date))
+
+```
+
+## What is mean total number of steps taken per day?
+```{r}
+#levels(d$date)
+daystepmean <- vector(mode ="numeric", length = length(levels(d$date)) )
+daystepsum <- vector(mode ="numeric", length = length(levels(d$date)) )
+daystepmedian <- vector(mode ="integer", length = length(levels(d$date)) )
+for (i in 1:length(levels(d$date)))
+        {daystepmean[i] <- mean(d$steps[d$date == levels(d$date)[i]], na.rm =TRUE)
+         daystepsum[i] <- sum(d$steps[d$date == levels(d$date)[i]], na.rm =TRUE)
+        daystepmedian[i] <- median(d$steps[d$date == levels(d$date)[i]], na.rm =TRUE)}
+hist(daystepsum)
+meanmediantable <- cbind(levels(d$date), daystepmean, daystepmedian, daystepsum)
+meanmediantable
+```
+
+
+## What is the average daily activity pattern?
+
+```{r}
+intervalstepmean <- vector(mode ="numeric", length = length(levels(as.factor(d$interval))))
+
+for (i in 1:length(levels(as.factor(d$interval))))
+        {intervalstepmean[i] <- mean(d$steps[as.factor(d$interval) == levels(as.factor(d$interval))[i]], na.rm =TRUE) }
+#intervalstepmean <<- intervalstepmean
+plot(levels(as.factor(d$interval)), intervalstepmean, type ="l")
+maxinterval <-levels(as.factor(d$interval))[which(intervalstepmean == max(intervalstepmean))]
+maxinterval
+```
+
+## Imputing missing values
+
+```{r}
+
+intervalstepmean <- vector(mode ="numeric", length = length(levels(as.factor(d$interval))))
+
+for (i in 1:length(levels(as.factor(d$interval))))
+        {intervalstepmean[i] <- mean(d$steps[as.factor(d$interval) == levels(as.factor(d$interval))[i]], na.rm =TRUE) }
+
+numberofmissingvalues <-sum(is.na(d$steps))
+rowsna <- which(is.na(d$steps))
+for (j in 1:numberofmissingvalues)
+        {rowd <- rowsna[j]
+       d$steps[rowd] <- intervalstepmean[which(levels(as.factor(d$interval))== d$interval[rowd])]      }
+
+
+daystepmean <- vector(mode ="numeric", length = length(levels(d$date)) )
+daystepsum <- vector(mode ="numeric", length = length(levels(d$date)) )
+daystepmedian <- vector(mode ="integer", length = length(levels(d$date)) )
+for (i in 1:length(levels(d$date)))
+        {daystepmean[i] <- mean(d$steps[d$date == levels(d$date)[i]], na.rm =TRUE)
+         daystepsum[i] <- sum(d$steps[d$date == levels(d$date)[i]], na.rm =TRUE)
+        daystepmedian[i] <- median(d$steps[d$date == levels(d$date)[i]], na.rm =TRUE)}
+hist(daystepsum)
+meanmediantable <- cbind(levels(d$date), daystepmean, daystepmedian, daystepsum)
+meanmediantable
+
+```
+# it appears there is significant  differences from imputing missing values
+# the total number of daily steps increases
+## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+#d$date <- as.Date(d$date)
+daysofweek <- weekdays(as.Date(d$date))
+for (k in 1:length(d$date))
+        {if (daysofweek[k] == "Sunday" | daysofweek[k] == "Saturday")
+                     {daysofweek[k] <- "weekend"}
+             else
+                     {daysofweek[k] <- "weekday"}
+             }
+library(dplyr)
+ d2<- mutate(d, daysofweek)
+d2$daysofweek <- as.factor(d2$daysofweek)
+weekdaydata <- filter(d2, daysofweek == "weekday")
+weekenddata <- filter(d2, daysofweek == "weekend")
+
+weekdayintervalstepmean <- vector(mode ="numeric", length = length(levels(as.factor(d$interval))))
+
+for (i in 1:length(levels(as.factor(weekdaydata$interval))))
+        {weekdayintervalstepmean[i] <- mean(weekdaydata$steps[as.factor(weekdaydata$interval) == levels(as.factor(weekdaydata$interval))[i]], na.rm =TRUE) }
+
+weekendintervalstepmean <- vector(mode ="numeric", length = length(levels(as.factor(d$interval))))
+
+for (i in 1:length(levels(as.factor(weekenddata$interval))))
+        {weekendintervalstepmean[i] <- mean(weekenddata$steps[as.factor(weekenddata$interval) == levels(as.factor(weekenddata$interval))[i]], na.rm =TRUE) }
+
+ par(mfrow = c(2, 1))
+plot(levels(as.factor(d$interval)), weekdayintervalstepmean, type ="l", xlab ="Interval", ylab = "Number of steps", main = "weekday")
+plot(levels(as.factor(d$interval)), weekendintervalstepmean, type ="l", xlab ="Interval", ylab = "Number of steps", main = "weekend")
+```
